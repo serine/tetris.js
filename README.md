@@ -1,6 +1,6 @@
 ## Learning exercises
 
-> Learning games deving and js lovin it!
+> Learning game deving and js. Lovin it!
 
 ## Happy playing
 
