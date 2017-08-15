@@ -6,7 +6,7 @@
 
 [Give it a blast!](https://serine.github.io/tetris.js/)
 
-## Controls keys
+## Control keys
 
 Keyboard arrows
 
