@@ -1,3 +1,11 @@
+window.onload=function() {
+  canv=document.getElementById("gc");
+  ctx=canv.getContext("2d");
+  document.getElementById("demo").innerHTML = "Score: 0";
+  document.addEventListener("keydown", keyPush);
+  timerId = setInterval(game, 1000/level);
+};
+
 function getShapeCoords(shapeCode, orient) {
   var shapeCoords;
   // I shape
@@ -126,25 +134,61 @@ function getFloorOffSet(shapeCode, orient) {
   };
 };
 
-function drawShape(shapeCoords, xPos, yPos) {
+function drawShape(shapeCoords, shapeCode, xPos, yPos) {
+  var shapeCol;
+
+  if(shapeCode == 105)
+    shapeCol = "red";
+  if(shapeCode == 106)
+    shapeCol = "orange";
+  if(shapeCode == 108)
+    shapeCol = "goldenrod";
+  if(shapeCode == 111)
+    shapeCol = "green";
+  if(shapeCode == 115)
+    shapeCol = "darkcyan";
+  if(shapeCode == 122)
+    shapeCol = "blue";
+  if(shapeCode == 116)
+    shapeCol = "deeppink";
+
   if(px>=xTileCount+rightOffSet)
     px=xTileCount+rightOffSet;
-  ctx.fillStyle="blue";
+  //ctx.fillStyle="blue";
+  ctx.fillStyle=shapeCol;
   for(var i=0; i<shapeCoords.length; i++) {
     // gs-2 to remove couple of pixels to make nice border
     ctx.fillRect((shapeCoords[i].x+xPos)*gs,(shapeCoords[i].y+yPos)*gs,gs-2,gs-2);
   };
 };
 
-function reDrawFeild(matrix) {
+function reDrawFeild(matrix, shapeCode) {
+  var shapeCol;
+
+  if(shapeCode == 105)
+    shapeCol = "red";
+  if(shapeCode == 106)
+    shapeCol = "orange";
+  if(shapeCode == 108)
+    shapeCol = "goldenrod";
+  if(shapeCode == 111)
+    shapeCol = "green";
+  if(shapeCode == 115)
+    shapeCol = "darkcyan";
+  if(shapeCode == 122)
+    shapeCol = "blue";
+  if(shapeCode == 116)
+    shapeCol = "deeppink";
+
   ctx.fillStyle="black";
   ctx.fillRect(0,0,canv.width,canv.height);
 
-  ctx.fillStyle="blue";
+  //ctx.fillStyle="blue";
+  ctx.fillStyle=shapeCol;
   var counter = 0;
   for(var i=0;i<matrix.length; i++) {
     for(var j=0; j<matrix[i].length; j++) {
-      if(matrix[i][j] == 1) 
+      if(matrix[i][j] >= 1) 
         ctx.fillRect(j*gs,i*gs,gs-2,gs-2);
     };
   };
@@ -164,62 +208,48 @@ function gameOver(matrix) {
              ];
 
   ctx.fillStyle="red";
+  var gs = 15;
   for(var i=0;i<text.length; i++) {
     ctx.fillRect(text[i].x*gs,text[i].y*gs,gs-2,gs-2);
   };
 };
 
-function getShapesFloor(shapeCoords, px, py) {
-  var yPos = 0;
-  for(var i=0; i<shapeCoords.length; i++) {
-    if(yPos < shapeCoords[i].y)
-      yPos = shapeCoords[i].y;
-  }
-  var xyPos = [];
-  for(var i=0; i < shapeCoords.length; i++){
-    if(shapeCoords[i].y == yPos)
-      xyPos.push({x: shapeCoords[i].x+px, y: shapeCoords[i].y+py})
-  }
-  return xyPos;
-}
 
-var shapes = [105, 106, 108, 111, 115, 116, 122];
-var shapeCode = shapes[Math.floor(Math.random()*7)];
-var orient = 0;
-var shapeCoords;
-var shapesFloor;
-var trailsCeiling;
-var timerId;
-var level = 8;
-var leftOffSet;
-var rightOffSet;
-var score = 0;
+function putPiece(matrix, shapeCoords, shapeCode, px, py) {
+  var shapeCol;
 
-px=10
-py=0;
-//gs - width and height of a single square in the grid
-gs=20;
-//tc - number of squares in the grid
-xTileCount=400/gs; 
-yTileCount=800/gs; 
-// only y velocity
-yv=0;
-var matrix = [];
-for(var i=0;i<=yTileCount; i++)
-  matrix.push(new Array(xTileCount).fill(0));
+  if(shapeCode == 105)
+    shapeCol = 1;
+  if(shapeCode == 106)
+    shapeCol = 2;
+  if(shapeCode == 108)
+    shapeCol = 3;
+  if(shapeCode == 111)
+    shapeCol = 4;
+  if(shapeCode == 115)
+    shapeCol = 5;
+  if(shapeCode == 122)
+    shapeCol = 6;
+  if(shapeCode == 116)
+    shapeCol = 7;
 
-function putPiece(matrix, shapeCoords, px, py) {
   for(var i=0; i<shapeCoords.length; i++) {
     var xIdx = shapeCoords[i].x+px;
     var yIdx = shapeCoords[i].y+py;
-    matrix[yIdx][xIdx] = 1;
-  }
-}
+    matrix[yIdx][xIdx] = shapeCol;
+  };
+};
+
 function cleanRow(matrix) {
   var score=0;
   for(var i=0;i<matrix.length; i++) {
-    var rowSum = matrix[i].reduce(function(sum, value) {return sum + value;});
-    if(rowSum == xTileCount) {
+    var chkRow = true;
+    for(var j=0; j<matrix[i].length; j++) {
+      if(matrix[i][j] == 0)
+        chkRow = false;
+    };
+
+    if(chkRow) {
       matrix.splice(i, 1);
       matrix.unshift(new Array(xTileCount).fill(0));
       score+=1;
@@ -233,7 +263,7 @@ function chkPiece(matrix, shapeCoords, px, py) {
     var xIdx = shapeCoords[i].x+px;
     var yIdx = shapeCoords[i].y+py;
     var chkIdx = matrix[yIdx][xIdx];
-    if(chkIdx == 1)
+    if(chkIdx >= 1)
       return true;
   };
   return false;
@@ -253,18 +283,38 @@ function dropPiece(matrix, shapeCoords, px, py) {
   };
 };
 
-window.onload=function() {
-  canv=document.getElementById("gc");
-  ctx=canv.getContext("2d");
-  document.addEventListener("keydown", keyPush);
-  timerId = setInterval(game,1000/level);
-};
+
+var shapes = [105, 106, 108, 111, 115, 116, 122];
+var shapeCode = shapes[Math.floor(Math.random()*7)];
+var orient = 0;
+var shapeCoords;
+var trailsCeiling;
+var timerId;
+var leftOffSet;
+var rightOffSet;
+var score = 0;
+var level = 5;
+var levelCnt = 0;
+
+px=10
+py=0;
+//gs - width and height of a single square in the grid
+gs=20;
+//tc - number of squares in the grid
+xTileCount=300/gs; 
+yTileCount=600/gs; 
+// only y velocity
+yv=0;
+var matrix = [];
+for(var i=0;i<=yTileCount; i++)
+  matrix.push(new Array(xTileCount).fill(0));
 //TODO make variable setInterval
 function game() {
 
-  reDrawFeild(matrix);
+  reDrawFeild(matrix, shapeCode);
   shapeCoords = getShapeCoords(shapeCode, orient);
-  drawShape(shapeCoords, px, py);
+  drawShape(shapeCoords, shapeCode, px, py);
+  //drawShape(shapeCoords, px, py);
 
   leftOffSet = getLeftOffSet(shapeCode, orient);
   rightOffSet = getRightOffSet(shapeCode, orient);
@@ -279,10 +329,15 @@ function game() {
         gameOver(matrix);
     };
     py-=1;
-    putPiece(matrix, shapeCoords, px, py);
+    putPiece(matrix, shapeCoords, shapeCode, px, py);
     score += cleanRow(matrix);
     var scoreField = "Score: "
     document.getElementById("demo").innerHTML = scoreField+score;
+    levelCnt+=1;
+    if(levelCnt == 10) {
+      level+=1;
+      levelCnt = 0;
+    };
     py=0;
     yv=1;
     shapeCode = shapes[Math.floor(Math.random()*7)];
@@ -343,3 +398,4 @@ function keyPush(evt) {
         break;
   };
 }
+
