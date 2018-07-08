@@ -1,7 +1,8 @@
 window.onload=function() {
   canv=document.getElementById("gc");
   ctx=canv.getContext("2d");
-  document.getElementById("demo").innerHTML = "Score: 0";
+  document.getElementById("score").innerHTML = "Score: 0";
+  document.getElementById("level").innerHTML = "Level: 5";
   document.addEventListener("keydown", keyPush);
   timerId = setInterval(game, 1000/level);
 };
@@ -78,9 +79,9 @@ function getLeftOffSet(shapeCode, orient) {
 
 function getRightOffSet(shapeCode, orient) {
   if(shapeCode == 105) {
-    if(orient == 0 || orient == 2) 
+    if(orient == 0 || orient == 2)
       return -4;
-    if(orient == 1 || orient == 3) 
+    if(orient == 1 || orient == 3)
       return -1;
   };
   if(shapeCode == 106 || shapeCode == 108) {
@@ -107,7 +108,7 @@ function getRightOffSet(shapeCode, orient) {
 
 function getFloorOffSet(shapeCode, orient) {
   if(shapeCode == 105) {
-    if(orient == 0 || orient == 2) 
+    if(orient == 0 || orient == 2)
       return 0;
     if(orient == 1 || orient == 3)
       return -3;
@@ -163,33 +164,33 @@ function drawShape(shapeCoords, shapeCode, xPos, yPos) {
 };
 
 function reDrawFeild(matrix, shapeCode) {
-  var shapeCol;
-
-  if(shapeCode == 105)
-    shapeCol = "red";
-  if(shapeCode == 106)
-    shapeCol = "orange";
-  if(shapeCode == 108)
-    shapeCol = "goldenrod";
-  if(shapeCode == 111)
-    shapeCol = "green";
-  if(shapeCode == 115)
-    shapeCol = "darkcyan";
-  if(shapeCode == 122)
-    shapeCol = "blue";
-  if(shapeCode == 116)
-    shapeCol = "deeppink";
 
   ctx.fillStyle="black";
   ctx.fillRect(0,0,canv.width,canv.height);
 
-  //ctx.fillStyle="blue";
-  ctx.fillStyle=shapeCol;
-  var counter = 0;
   for(var i=0;i<matrix.length; i++) {
     for(var j=0; j<matrix[i].length; j++) {
-      if(matrix[i][j] >= 1) 
+      var shapeCol = "";
+
+      if(matrix[i][j] == 1)
+        shapeCol = "red";
+      else if(matrix[i][j] == 2)
+        shapeCol = "orange";
+      else if(matrix[i][j] == 3)
+        shapeCol = "goldenrod";
+      else if(matrix[i][j] == 4)
+        shapeCol = "green";
+      else if(matrix[i][j] == 5)
+        shapeCol = "darkcyan";
+      else if(matrix[i][j] == 6)
+        shapeCol = "blue";
+      else if(matrix[i][j] == 7)
+          shapeCol = "deeppink";
+
+      if(shapeCol) {
+        ctx.fillStyle=shapeCol;
         ctx.fillRect(j*gs,i*gs,gs-2,gs-2);
+      };
     };
   };
 };
@@ -301,8 +302,8 @@ py=0;
 //gs - width and height of a single square in the grid
 gs=20;
 //tc - number of squares in the grid
-xTileCount=300/gs; 
-yTileCount=600/gs; 
+xTileCount=300/gs;
+yTileCount=600/gs;
 // only y velocity
 yv=0;
 var matrix = [];
@@ -332,11 +333,14 @@ function game() {
     putPiece(matrix, shapeCoords, shapeCode, px, py);
     score += cleanRow(matrix);
     var scoreField = "Score: "
-    document.getElementById("demo").innerHTML = scoreField+score;
+    var levelField = "Level: "
+    document.getElementById("score").innerHTML = scoreField+score;
     levelCnt+=1;
     if(levelCnt == 10) {
-      level+=1;
+      console.log(levelCnt)
+      //level+=1;
       levelCnt = 0;
+      document.getElementById("level").innerHTML = levelField+level;
     };
     py=0;
     yv=1;
@@ -353,7 +357,7 @@ function keyPush(evt) {
       //case 13:
       //  dropPiece(matrix, shapeCoords, px, py);
       //  yv=1;
-      case 32:
+      case 32: // space
         // using oldKeyCount and oldFlipCount variables
         // to preserve keyboard state
         if(timerId) {
@@ -377,14 +381,14 @@ function keyPush(evt) {
         yv=1;
         break;
       case 38: //up
-        if(orient == 3) 
+        if(orient == 3)
           orient = 0;
         else
           orient += 1;
         yv=1;
         break;
       case 39: //right
-        if(px>=xTileCount+rightOffSet)
+      if(px>=xTileCount+rightOffSet)
           px=xTileCount+rightOffSet;
         else
           px+=1;
@@ -392,7 +396,7 @@ function keyPush(evt) {
         break;
       case 40: //down
         if(py<=yTileCount-7)
-          yv=3; 
+          yv=3;
         else
           yv=1;
         break;
